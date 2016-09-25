@@ -1,8 +1,5 @@
-#include <iostream>
 #include "lapack_c_interface.h"
-
-using namespace std;
-
+#include "utils.h"
 
 /*
 	MATLAB equivalent of A*B, where
@@ -37,20 +34,9 @@ int main()
 	int lda = n, ldb = k, ldc = n;
 
 	// a[n][n] contiguous 2d array
-	a = new double*[m];
-	a[0] = new double[m*k];
-	for (i=1; i<m; i++)
-		a[i] = a[i-1] + k;
-	
-	b = new double*[k];
-	b[0] = new double[k*n];
-	for (i=1; i<k; i++)
-		b[i] = b[i-1] + n;
-
-	c = new double*[m];
-	c[0] = new double[m*n];
-	for (i=1; i<m; i++)
-		c[i] = c[i-1] + n;
+	a = dmatrix_malloc(m, k);
+	b = dmatrix_malloc(k, n);
+	c = dmatrix_malloc(m, n);
 
 	// populate matrix a 
 	a[0][0]=2.3; a[0][1]=3.2; a[0][2]=3.4; a[0][3]=5.5; a[0][4]=2.0; a[0][5]=2.1; 
@@ -67,36 +53,16 @@ int main()
 	b[4][0]=0.2; b[4][1]=4.4; b[4][2]=2.2; b[4][3]=5.4; b[4][4]=2.4; b[4][5]=2.1; b[4][6]=1.1;
 	b[5][0]=1.2; b[5][1]=5.4; b[5][2]=3.2; b[5][3]=6.4; b[5][4]=3.4; b[5][5]=3.1; b[5][6]=1.1;
 
-	for (i=0; i<m; i++)
-	{
-		for (j=0; j<k; j++)
-			cout << a[i][j] << " ";
-		cout << endl;
-	}
-	cout << endl;
-	for (i=0; i<k; i++)
-	{
-		for (j=0; j<n; j++)
-			cout << b[i][j] << " ";
-		cout << endl;
-	}
-	cout << endl;
+	print_dmatrix(a, m, k);
+	print_dmatrix(b, k, n);
 
 	// matrix-vector product
 	dgemm_(&no, &no, &n, &m, &k, &alpha, &b[0][0], &lda, &a[0][0], &ldb, &beta, &c[0][0], &ldc);
 
-	for (i=0; i<m; i++)
-	{
-		for (j=0; j<n; j++)
-			cout << c[i][j] << " ";
-		cout << endl;
-	}
+	print_dmatrix(c, m, n);
 
-	delete [] a[0];
-	delete [] a;
-	delete [] b[0];
-	delete [] b;
-	delete [] c[0];
-	delete [] c;
+	dmatrix_dealloc(a);
+	dmatrix_dealloc(b);
+	dmatrix_dealloc(c);
 	return 0;
 }

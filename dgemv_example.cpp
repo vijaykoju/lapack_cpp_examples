@@ -1,8 +1,5 @@
-#include <iostream>
 #include "lapack_c_interface.h"
-
-using namespace std;
-
+#include "utils.h"
 
 /*
 	MATLAB equivalent of A*B, where
@@ -30,14 +27,9 @@ int main()
 	double **a, *x, *y;
 	int lda = n, incx = 1, incy = 1;
 
-	// a[n][n] contiguous 2d array
-	a = new double*[m];
-	a[0] = new double[m*n];
-	for (i=1; i<m; i++)
-		a[i] = a[i-1] + n;
-	
-	x = new double[n];
-	y = new double[m];
+	a = dmatrix_malloc(m, n);
+	x = dvector_malloc(n);
+	y = dvector_malloc(m);
 
 	// populate matrix a
 	a[0][0]=2.3; a[0][1]=3.2; a[0][2]=3.4; a[0][3]=5.5; a[0][4]=2.0; a[0][5]=2.1; 
@@ -46,25 +38,19 @@ int main()
 	a[3][0]=4.6; a[3][1]=7.5; a[3][2]=3.0; a[3][3]=0.3; a[3][4]=4.5; a[3][5]=4.4;
 	a[4][0]=0.2; a[4][1]=4.4; a[4][2]=2.2; a[4][3]=5.4; a[4][4]=2.4; a[4][5]=2.1;
 
-	for (i=0; i<m; i++)
-	{
-		for (j=0; j<n; j++)
-			cout << a[i][j] << " ";
-		cout << endl;
-	}
-
 	// populate matrix x
 	x[0]=2.3; x[1]=5.3; x[2]=6.0; x[3]=5.3; x[4]=2.4; x[5]=3.2; 
+
+	print_dmatrix(a, m, n);
+	print_dvector(x, n);
 
 	// matrix-vector product
 	dgemv_(&tr, &n, &m, &alpha, &a[0][0], &lda, x, &incx, &beta, y, &incy);
 
-	for (i=0; i<m; i++)
-		cout << y[i] << endl;
+	print_dvector(y, m);
 
-	delete [] a[0];
-	delete [] a;
-	delete [] x;
-	delete [] y;
+	dmatrix_dealloc(a);
+	dvector_dealloc(x);
+	dvector_dealloc(y);
 	return 0;
 }
